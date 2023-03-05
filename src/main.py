@@ -142,13 +142,13 @@ def string_decrypt(byte_stream, key):
 
 
 ### Main
-enc = encrypt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(enc)
-dec = decrypt(int(enc, 0), 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(dec)
+import time
+string = open('beemovie double.txt', 'r').read()
 
-test_string = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little body off the ground. The bee, of course, flies anyway because bees don't care what humans think is impossible."
-test_enc = string_encrypt(test_string, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(test_enc)
+start_time = time.time()
+
+test_enc = string_encrypt(string, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+#print(test_enc)
 test_dec = string_decrypt(test_enc, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(test_dec)
+
+print("--- %s seconds ---" % (time.time() - start_time))
