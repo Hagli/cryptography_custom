@@ -71,7 +71,7 @@ def encrypt(block, ext_key):
     round_state = block
 
     # Key schedule
-    for rnd_cnt in range(ROUND_LIMIT):
+    for rnd_cnt in range(ROUND_LIMIT+1):
         key_schedule.append(current_round_key >> 64)
         current_round_key = key_function(current_round_key, rnd_cnt + 1)
 
@@ -82,7 +82,10 @@ def encrypt(block, ext_key):
         rounded_lower = round_function(lower_64, key_schedule[rnd])
         rounded_upper = upper_64 ^ rounded_lower
         round_state = (rounded_upper + (lower_64 << 64))
+        print("Round "+str(rnd))
+        print(hex(round_state))
 
+    round_state = round_state^key_schedule[ROUND_LIMIT]
     return(hex(round_state))
 
 def decrypt(block, ext_key):
@@ -92,9 +95,11 @@ def decrypt(block, ext_key):
     round_state = block
 
     # Key schedule
-    for rnd_cnt in range(ROUND_LIMIT):
+    for rnd_cnt in range(ROUND_LIMIT+1):
         key_schedule.append(current_round_key >> 64)
         current_round_key = key_function(current_round_key, rnd_cnt + 1)
+
+    round_state = round_state^key_schedule[ROUND_LIMIT]
 
     # Feistel Network
     for rnd in reversed(range(ROUND_LIMIT)):
@@ -108,5 +113,7 @@ def decrypt(block, ext_key):
 
 enc = encrypt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
 print(enc)
-dec = decrypt(int(enc, 0), 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(hex(dec))
+#lnc = encrypt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F1, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+#print(lnc)
+#dec = decrypt(int(enc, 0), 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+#print(hex(dec))
