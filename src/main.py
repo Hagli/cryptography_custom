@@ -62,9 +62,9 @@ def key_function(key, round_count):
 
 
 # Main
-test_vectors_128 = {1: (0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)} # key, block
+test_vectors_128 = {1: (0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)} # block, key
 
-def cipher(block, ext_key):
+def encrypt(block, ext_key):
 
     key_schedule = []
     current_round_key = ext_key
@@ -76,7 +76,7 @@ def cipher(block, ext_key):
         current_round_key = key_function(current_round_key, rnd_cnt + 1)
 
     # Feistel Network
-    for rnd in range(ROUND_LIMIT - 1):
+    for rnd in range(ROUND_LIMIT):
         upper_64 = (round_state >> 64)
         lower_64 = (round_state & 0xFFFFFFFFFFFFFFFF)
         rounded_lower = round_function(lower_64, key_schedule[rnd])
@@ -85,5 +85,28 @@ def cipher(block, ext_key):
 
     return(hex(round_state))
 
-output = cipher(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(output)
+def decrypt(block, ext_key):
+
+    key_schedule = []
+    current_round_key = ext_key
+    round_state = block
+
+    # Key schedule
+    for rnd_cnt in range(ROUND_LIMIT):
+        key_schedule.append(current_round_key >> 64)
+        current_round_key = key_function(current_round_key, rnd_cnt + 1)
+
+    # Feistel Network
+    for rnd in reversed(range(ROUND_LIMIT)):
+        upper_64 = (round_state >> 64)
+        lower_64 = (round_state & 0xFFFFFFFFFFFFFFFF)
+        rounded_upper = round_function(upper_64, key_schedule[rnd])
+        prev_upper = lower_64 ^ rounded_upper
+        round_state = (upper_64 + (prev_upper << 64))
+
+    return(round_state)
+
+enc = encrypt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+print(enc)
+dec = decrypt(int(enc, 0), 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+print(hex(dec))
