@@ -5,11 +5,11 @@ def create_s_box() :
     for i in range(len(transform_map)):
         x = transform_map[i]
         x = x^(x << 1)^(x << 2)^(x << 3)^(x << 4)^3
-        x = x % 16
+        x = x & 15
         transform_map[i] = x
     return(transform_map)
 
-def substitue(plainbit, s_box): #plainbit in 64 bit
+def substitute(plainbit, s_box): #plainbit in 64 bit
     a = 0
     for i in range(16):
         l = s_box[(plainbit >> i*4) & 15]

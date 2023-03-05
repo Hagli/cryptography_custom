@@ -1,3 +1,5 @@
+import random
+
 def create_p_box():
     #kek = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ,11, 12, 13, 14, 15]
     a = []
@@ -7,9 +9,9 @@ def create_p_box():
     random.shuffle(a)
     return(a)
 
-def permutate(plainbit, p_box):
+def permute(plainbit, p_box):
     plainbit = format(plainbit, 'b')
     shadowbit = plainbit
     for i in range(64):
-        plainbit[i] = shadowbit[s_box[i]]
+        plainbit[i] = shadowbit[p_box[i]]
     return plainbit
