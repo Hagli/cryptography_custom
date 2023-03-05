@@ -61,9 +61,7 @@ def key_function(key, round_count):
     return round_key_int
 
 
-# Main
-test_vectors_128 = {1: (0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)} # block, key
-
+# 128-bit Encrypt and Decrypt
 def encrypt(block, ext_key):
 
     key_schedule = []
@@ -104,9 +102,53 @@ def decrypt(block, ext_key):
         prev_upper = lower_64 ^ rounded_upper
         round_state = (upper_64 + (prev_upper << 64))
 
-    return(round_state)
+    return(hex(round_state))
 
+# String Encrypt and Decrypt
+def string_encrypt(string, key):
+    arr = bytes(string, 'ascii')
+
+    blocks = []
+    for i in range(0, len(arr), 4):
+        blocks.append(int.from_bytes(arr[i:i+4], 'big'))
+
+    enc_blocks = []
+    for block in blocks:
+        res = encrypt(block, key)
+        enc_blocks.append(int(res, 0))
+    
+    enc_stream = b''
+    for block in enc_blocks:
+        enc_stream += int.to_bytes(block, 16, 'big')
+
+    return enc_stream
+
+def string_decrypt(byte_stream, key):
+
+    blocks = []
+    for i in range(0, len(byte_stream), 16):
+        blocks.append(int.from_bytes(byte_stream[i:i+16], 'big'))
+
+    dec_blocks = []
+    for block in blocks:
+        res = decrypt(block, key)
+        dec_blocks.append(int(res, 0))
+
+    dec_string = ''
+    for block in dec_blocks:
+        dec_string += int.to_bytes(block, 16, 'big').decode('ascii')
+
+    return dec_string
+
+
+### Main
 enc = encrypt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
 print(enc)
 dec = decrypt(int(enc, 0), 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
-print(hex(dec))
+print(dec)
+
+test_string = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little body off the ground. The bee, of course, flies anyway because bees don't care what humans think is impossible."
+test_enc = string_encrypt(test_string, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+print(test_enc)
+test_dec = string_decrypt(test_enc, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0)
+print(test_dec)
